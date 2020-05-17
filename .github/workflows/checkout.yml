@@ -1,0 +1,257 @@
+name: 'checkout'
+
+on:
+  push:
+
+env:
+  CI: true
+
+jobs:
+
+  v1:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: git describe --dirty
+
+  v2:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: git describe --dirty
+
+  v2-depth0:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - run: git describe --dirty
+
+  v2-unshallow:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --unshallow
+    - run: git describe --dirty
+
+  v2-depth0-unshallow:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - run: git fetch --unshallow
+    - run: git describe --dirty
+
+  master:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@master
+    - run: git describe --dirty
+
+  master-depth0:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+    - run: git describe --dirty
+
+  master-unshallow:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu, windows, macos ]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@master
+    - run: git fetch --unshallow
+    - run: git describe --dirty
+
+  msys-depth0:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+    - run: git describe --dirty
+    - shell: msys2 {0}
+      run: |
+        git describe --dirty
+
+  msys-unshallow:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+    - uses: actions/checkout@master
+    - run: git fetch --unshallow
+    - run: git describe --dirty
+    - shell: msys2 {0}
+      run: |
+        git describe --dirty
+
+  msys-depth0-git:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+        install: git
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+    - run: git describe --dirty
+    - shell: msys2 {0}
+      run: |
+        git describe --dirty
+
+  msys-unshallow-git:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+        install: git
+    - uses: actions/checkout@master
+    - run: git fetch --unshallow
+    - run: git describe --dirty
+    - shell: msys2 {0}
+      run: |
+        git describe --dirty
+
+  msys-depth0-inherit:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+        path-type: inherit
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+    - shell: msys2 {0}
+      run: |
+        git describe --dirty
+
+  msys-unshallow-inherit:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+        path-type: inherit
+    - uses: actions/checkout@master
+    - run: git fetch --unshallow
+    - shell: msys2 {0}
+      run: |
+        git describe --dirty
+
+  msys-clone:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+        install: git
+    - shell: msys2 {0}
+      run: |
+        git clone https://github.com/$GITHUB_REPOSITORY
+        cd ghdl
+        git checkout --force $GITHUB_SHA
+        git describe --dirty
+
+  msys-inherit-clone:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        task: [ MINGW32, MINGW64 ]
+    runs-on: windows-latest
+    steps:
+    - uses: eine/setup-msys2@v0
+      with:
+        msystem: ${{ matrix.task }}
+        update: true
+        path-type: inherit
+    - shell: msys2 {0}
+      run: |
+        git clone https://github.com/$GITHUB_REPOSITORY
+        cd ghdl
+        git checkout --force $GITHUB_SHA
+        git describe --dirty
