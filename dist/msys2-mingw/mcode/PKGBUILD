@@ -8,11 +8,16 @@ arch=('any')
 depends=('zlib-devel')
 makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-gcc-ada")
 
+prepare() {
+  cd "${srcdir}"/../../../..
+  patch -p1 < "${startdir}"/libghdl_static.diff
+}
+
 build() {
   mkdir "${srcdir}/builddir"
   cd "${srcdir}/builddir"
   ../../../../../configure --prefix=${MINGW_PREFIX} LDFLAGS=-static --enable-libghdl --enable-synth
-  make GNATMAKE="gnatmake -j$(nproc)"
+  make GNATMAKE="gnatmake -j$(nproc)" GNAT_BARGS="-bargs -E -static" GNAT_LARGS="-static -lz"
 }
 
 package() {
